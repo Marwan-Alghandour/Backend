@@ -3,7 +3,9 @@ const request = require("supertest");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const { assert } = require("@hapi/joi");
 var server;
+var token;
 require("dotenv").config();
 
 describe("test user authentication", () => {
@@ -12,6 +14,7 @@ describe("test user authentication", () => {
         mongoose.connection.close()
         done();
     });
+
     describe("/login", () => {
         beforeEach(async () => {
             server = await require("../../app.js");
@@ -62,6 +65,46 @@ describe("test user authentication", () => {
             expect(res.status).toBe(400);
             res = await request(server).post("/login").send({username: "username"});
             expect(res.status).toBe(400);
+        });
+    });
+
+    describe("/create-account", () => {
+        beforeAll(async done => {
+            const hash = await bcrypt.hash("adminadmin", 10);
+            const user = new User({
+                                    username: "adminadmin",
+                                    password: hash,
+                                    email: "admin@example.com",
+                                    role: "admin"
+                                });
+            await user.save();
+            token = await user.generateAuthToken();
+            done();
+        });
+
+        beforeEach(async (done) => {
+            server = await require("../../app.js");
+            done();
+        });
+
+        afterEach(async (done) => {
+            server.close();
+            await User.deleteMany({});
+            done();
+        });
+
+        it("should create an account in the database with the given role and return 200 status", async () => {
+
+            let res = await request(server).post("/create-account")
+            .set("token", token)
+            .send({
+                username: "username",
+                email: "email@exmaple.com",
+                role: "teacher",
+                password: "somepassword"
+            });
+            expect(res.body.message).toBe("user 'username' was created successfully");
+            expect(res.status).toBe(200);
         });
     });
 });

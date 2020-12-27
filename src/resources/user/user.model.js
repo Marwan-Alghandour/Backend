@@ -57,5 +57,19 @@ function validateUser(data) {
     else return false;
 };
 
+function validateUserData(data){
+    const Schema = joi.object({
+        username: joi.string().min(5).max(255).required(),
+        password: joi.string().min(8).max(1023).required(),
+        email: joi.string().min(8).max(1023).required(),
+        role: joi.string().valid("student", "teacher", "admin").default("student")
+    });
+    // const result = joi.validate(data, Schema)
+    const result = Schema.validate(data);
+    if(result.error) return result.error.details[0].message;
+    else return false;
+}
+
 exports.User = User; 
 exports.validateUser = validateUser;
+exports.validateUserData = validateUserData;

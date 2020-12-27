@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
-const { User, validateUser } = require("./user.model.js");
+const { User, validateUser, validateUserData } = require("./user.model.js");
+const jwt = require("jsonwebtoken");
 
 const login = async function(req, res) {
     /**
@@ -26,4 +27,43 @@ const login = async function(req, res) {
     }
 }
 
-module.exports = {login};
+
+const createAccount = async function (req, res) {
+    const token = req.headers.token;
+    if(!token) return res.status(401).send({message: "Forbidden"});
+
+    const payload = jwt.verify(token, process.env.APP_KEY);
+    if(payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
+
+    const err = validateUserData(req.body);
+    if(err) return status(400).send(err);
+
+    try{
+        let user = await User.findOne({
+            username: req.body.username.toLowerCase()
+        });
+        if (user)
+        return res
+            .status(400)
+            .send(`Username: ${req.body.username} already exists`);
+        
+        user = new User({
+            username: req.body.username,
+            role: req.body.role,
+            email: req.body.email
+        });
+
+        const salt = await bcrypt.genSalt(10);
+        const crypted_pwd = await bcrypt.hash(req.body.password, salt);
+        user.password = crypted_pwd;
+
+        await user.save();
+
+        res.send({message: `user '${user.username}' was created successfully`});
+
+    }catch(e){
+        return res.status(500).send({message: `Server Error: ${e.message}`});
+    }
+}
+
+module.exports = {login, createAccount};
