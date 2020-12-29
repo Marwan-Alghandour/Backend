@@ -5,8 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
-    "test": "env NODE_ENV=test jest",
-    "test:coverage": "env NODE_ENV=test jest --coverage"
+    "test": "env NODE_ENV=test jest --forceExit --detectOpenHandles --maxWorkers=1",
+    "test:coverage": "env NODE_ENV=test jest --forceExit --detectOpenHandles --maxWorkers=1 --coverage"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",

@@ -11,24 +11,27 @@ require("dotenv").config();
 describe("test user authentication", () => {
 
     afterAll(done => {
-        mongoose.connection.close()
+        // mongoose.connection.close();
+        server.close();
         done();
     });
 
     describe("/login", () => {
-        beforeEach(async () => {
+        beforeEach(async (done) => {
             server = await require("../../app.js");
             const hash = await bcrypt.hash("mypassword", 10);
             const user = new User({ username: "username", password: hash, email: "user@example.com" });
             await user.save();
+            done();
         });
 
-        afterEach(async () => {
+        afterEach(async (done) => {
             server.close();
             await User.deleteMany({});
+            done();
         });
 
-        it("should return status code 200 with token in place", async () => {
+        it("should return status code 200 with token in place", async (done) => {
             const res = await request(server)
                 .post("/login")
                 .send({ username: "username", password: "mypassword" });
@@ -42,29 +45,33 @@ describe("test user authentication", () => {
             expect(payload.username).toBe("username");
             expect(payload.email).toBe("user@example.com");
             expect(payload.role).toBe("student");
+            done()
         });
 
-        it("should return status code 400 with Wrong username or password error", async () => {
+        it("should return status code 400 with Wrong username or password error", async (done) => {
             const res = await request(server)
                 .post("/login")
                 .send({ username: "not my username", password: "mypassword" });
             expect(res.status).toBe(400);
-            expect(res.text).toBe("Wrong username or password")
+            expect(res.text).toBe("Wrong username or password");
+            done()
         });
 
-        it("should return status code 400 with Wrong username or password error", async () => {
+        it("should return status code 400 with Wrong username or password error", async (done) => {
             const res = await request(server)
                 .post("/login")
                 .send({ username: "username", password: "not my password" });
             expect(res.status).toBe(400);
             expect(res.text).toBe("Wrong username or password")
+            done();
         });
 
-        it("should return status code 400 with required data", async () => {
-            var res = await request(server).post("/login").send({password: "password"});
+        it("should return status code 400 with required data", async (done) => {
+            var res = await request(server).post("/login").send({ password: "password" });
             expect(res.status).toBe(400);
-            res = await request(server).post("/login").send({username: "username"});
+            res = await request(server).post("/login").send({ username: "username" });
             expect(res.status).toBe(400);
+            done();
         });
     });
 
@@ -72,11 +79,11 @@ describe("test user authentication", () => {
         beforeAll(async done => {
             const hash = await bcrypt.hash("adminadmin", 10);
             const user = new User({
-                                    username: "adminadmin",
-                                    password: hash,
-                                    email: "admin@example.com",
-                                    role: "admin"
-                                });
+                username: "adminadmin",
+                password: hash,
+                email: "admin@example.com",
+                role: "admin"
+            });
             await user.save();
             token = await user.generateAuthToken();
             done();
@@ -88,23 +95,24 @@ describe("test user authentication", () => {
         });
 
         afterEach(async (done) => {
-            server.close();
+            await server.close();
             await User.deleteMany({});
             done();
         });
 
-        it("should create an account in the database with the given role and return 200 status", async () => {
+        it("should create an account in the database with the given role and return 200 status", async (done) => {
 
             let res = await request(server).post("/create-account")
-            .set("token", token)
-            .send({
-                username: "username",
-                email: "email@exmaple.com",
-                role: "teacher",
-                password: "somepassword"
-            });
+                .set("token", token)
+                .send({
+                    username: "username",
+                    email: "email@exmaple.com",
+                    role: "teacher",
+                    password: "somepassword"
+                });
             expect(res.body.message).toBe("user 'username' was created successfully");
             expect(res.status).toBe(200);
+            done();
         });
     });
 });
