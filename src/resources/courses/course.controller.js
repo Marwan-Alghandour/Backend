@@ -31,4 +31,18 @@ async function create_course(req, res) {
     }
 }
 
+async function take_content(req, res){
+    try {
+        let request = await Course.findOne({code: req.body.code});
+        if(!request) return res.status(400).send({message: "Course with this code doesn't exist"});
+        //const content = {content: req.body.content}; 
+        insert = await Course.findOneAndUpdate({code: req.body.code}, {content: req.body.content});
+        return res.send({message: `Course '${course.name}' was updated successfully`});
+    }catch(e){
+        return res.status(500).send({message: e.message});
+    }
+}
+
 module.exports.create_course = create_course;
+
+module.exports.take_content = take_content;
