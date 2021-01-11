@@ -3,17 +3,17 @@ const { Course, validateCourse } = require("./course.model");
 
 async function create_course(req, res) {
     const token = req.headers.token;
-    if(!token) return res.status(401).send({message: "Forbidden"});
+    if (!token) return res.status(401).send({ message: "Forbidden" });
 
     const payload = jwt.verify(token, process.env.APP_KEY);
-    if(payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
+    if (payload.role !== "admin") return res.status(401).send({ message: "Forbidden" });
 
     const error = validateCourse(req.body);
-    if(error) return res.status(400).send({message: error});
-    
+    if (error) return res.status(400).send({ message: error });
+
     try {
-        let course = await Course.findOne({code: req.body.code});
-        if(course) return res.status(400).send({message: "Course with this code already exists"});
+        let course = await Course.findOne({ code: req.body.code });
+        if (course) return res.status(400).send({ message: "Course with this code already exists" });
 
         course = new Course({
             name: req.body.name,
@@ -24,45 +24,51 @@ async function create_course(req, res) {
         });
 
         await course.save();
-        return res.send({message: `Course '${course.name}' was created successfully`});
+        return res.send({ message: `Course '${course.name}' was created successfully` });
 
-    }catch(e){
-        return res.status(500).send({message: e.message});
+    } catch (e) {
+        return res.status(500).send({ message: e.message });
     }
 }
 
-async function take_content(req, res){
+async function take_content(req, res) {
     const token = req.headers.token;
-    if(!token) return res.status(401).send({message: "Forbidden"});
+    if (!token) return res.status(401).send({ message: "Forbidden" });
 
     const payload = jwt.verify(token, process.env.APP_KEY);
-    if(payload.role !== "teacher" && payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
-        
+    if (payload.role !== "teacher" && payload.role !== "admin") return res.status(401).send({ message: "Forbidden" });
+
     try {
-        let request = await Course.findOne({code: req.body.code});
-        if(!request) return res.status(400).send({message: "Course with this code doesn't exist"});
+        let request = await Course.findOne({ code: req.body.code });
+        if (!request) return res.status(400).send({ message: "Course with this code doesn't exist" });
 
         //const content = {content: req.body.content}; 
-        insert = await Course.findOneAndUpdate({code: req.body.code}, {content: req.body.content});
-        return res.send({message: `Course '${req.body.code}' was updated successfully`});
-    }catch(e){
-        return res.status(500).send({message: e.message});
+        insert = await Course.findOneAndUpdate({ code: req.body.code }, { content: req.body.content });
+        return res.send({ message: `Course '${req.body.code}' was updated successfully` });
+    } catch (e) {
+        return res.status(500).send({ message: e.message });
     }
 }
 
-async function get_users_in_course(req, res){
+async function get_users_in_course(req, res) {
     const token = req.headers.token;
-    if(!token) return res.status(401).send("Forbidden");
+    if (!token) return res.status(401).send("Forbidden");
 
     const payload = jwt.verify(token, process.env.APP_KEY);
-    const course_id = req.params.cours_id;
-    try{
-        const course = await Course.findById(course_id).populate("User").exec();
-        if(!course) return res.status(404).send("Course not found");
+    if (!payload) return res.status(401).send("Forbidden");
+
+    const course_id = req.params.courseID;
+    try {
+        let course = await Course.findById(course_id);
+        if (!course) return res.status(404).send({message: "Course not found"});
         console.log(course);
-        res.send({students: course.students.filter(st => st.role === "student")});
-    }catch(e){
-        return res.status(500).send(e.message);
+        res.send({
+            course: course,
+            message: "Success",
+            students: course.students
+        });
+    } catch (e) {
+        return res.status(500).send({message: e.message});
     }
 }
 

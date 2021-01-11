@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     password: {type: String, minlength: 5, maxlength: 1023, required: true},
     role: {type: String, default: "student"},
     email: {type: String, minlength: 5, maxlength: 1023, required: true},
-    Courses: [ {type: mongoose.ObjectId, ref: "Course"} ]
+    Courses: [{type: mongoose.Types.ObjectId, ref: "Course"}]
 });
 
 userSchema.methods.generateAuthToken = function(){
@@ -36,7 +36,7 @@ userSchema.methods.generateAuthToken = function(){
     return token
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema, 'users');
 
 function validateUser(data) {
     /**

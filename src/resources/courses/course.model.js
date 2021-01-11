@@ -12,7 +12,7 @@ const CourseSchema = new mongoose.Schema({
     students: [{type: mongoose.Types.ObjectId, ref: "User"}]
 });
 
-const Course = mongoose.model("Course", CourseSchema);
+const Course = mongoose.model("Course", CourseSchema, 'courses');
 
 
 function validateCourse(data) {

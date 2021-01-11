@@ -53,7 +53,7 @@ const createAccount = async function (req, res) {
     if(payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
 
     const err = validateUserData(req.body);
-    if(err) return status(400).send(err);
+    if(err) return res.status(400).send({message: err});
 
     try{
         let user = await User.findOne({

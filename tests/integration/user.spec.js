@@ -3,8 +3,17 @@ const request = require("supertest");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
+const { Course } = require("../../src/resources/courses/course.model");
 var server;
 var token;
+var course_id;
+var user_data = {
+    _id: mongoose.Types.ObjectId(),
+    username: "username",
+    email: "email@exmaple.com",
+    role: "teacher",
+    password: "somepassword"
+}
 require("dotenv").config();
 
 describe("test user authentication", () => {
@@ -91,7 +100,7 @@ describe("test user authentication", () => {
         });
 
 
-        afterEach(async (done) => {
+        afterAll(async (done) => {
             await User.deleteMany({});
             done();
         });
@@ -101,14 +110,49 @@ describe("test user authentication", () => {
             let res = await request(server).post("/create-account")
                 .set("token", token)
                 .send({
-                    username: "username",
-                    email: "email@exmaple.com",
-                    role: "teacher",
-                    password: "somepassword"
+                    username: user_data.username,
+                    email: user_data.email,
+                    role: user_data.role,
+                    password: user_data.password
                 });
             expect(res.body.message).toBe("user 'username' was created successfully");
             expect(res.status).toBe(200);
             done();
         });
     });
+
+    describe("/get-users/course-id", () => {
+
+        beforeAll(async done => {
+            const hash = await bcrypt.hash("useruser", 10);
+            const user = new User(user_data);
+            await user.save();
+            token = await user.generateAuthToken();
+            course_id = mongoose.Types.ObjectId();
+            let course = new Course({
+                _id: course_id,
+                code: "CSE101",
+                name: "Structural Programing",
+                credit_hours: 4,
+                students: [user._id]
+            })
+            course = await course.save();
+            done();
+        });
+
+
+        afterAll(async (done) => {
+            await User.deleteMany({});
+            await Course.deleteMany({});
+            done();
+        });
+
+        it("should get all users that are registered in this course", async () => {
+            console.log(`/users/${course_id}`);
+            let res = await request(server).get(`/users/${course_id}`).set({token});
+            expect(res.body.message).toBe("Success");
+            expect(res.status).toBe(200);
+            expect(res.body.students).toStrictEqual([user_data._id.toHexString()]);
+        });
+    })
 });
