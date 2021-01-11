@@ -8,7 +8,7 @@ const CourseSchema = new mongoose.Schema({
     profs: {type: [String]},
     TAs: {type: [String]},
     credit_hours: {type: Number, min: 0, max: 10},
-    content: {type: [Object]},
+    content: {type: [Object], default: []},
 });
 
 const Course = mongoose.model("Course", CourseSchema);

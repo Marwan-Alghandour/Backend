@@ -33,10 +33,10 @@ async function create_course(req, res) {
 
 async function take_content(req, res){
     const token = req.headers.token;
-        if(!token) return res.status(401).send({message: "Forbidden"});
+    if(!token) return res.status(401).send({message: "Forbidden"});
 
-        const payload = jwt.decode(token);
-        if(payload.role !== "teacher" || payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
+    const payload = jwt.decode(token);
+    if(payload.role !== "teacher" && payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
         
     try {
         let request = await Course.findOne({code: req.body.code});

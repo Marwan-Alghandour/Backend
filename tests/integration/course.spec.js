@@ -6,13 +6,9 @@ const mongoose = require("mongoose");
 require("dotenv").config();
 var server;
 var token;
+var course_id;
 
 describe("test user authentication", () => {
-
-    // beforeAll(done => {
-    //     mongoose.connection.open();
-    //     done()
-    // });
 
     afterAll(done => {
         // mongoose.connection.close()
@@ -44,22 +40,79 @@ describe("test user authentication", () => {
         });
 
         it("should return 200 and should create course in database", (done) => {
-            
+
             request(server).post("/create-course")
-            .set("token", token)
-            .send({
-                name: "Course one",
-                code: "CSE156",
-                profs: ["Ashraf Salem", "Wathiq El-Qorashy"],
-                TAs: ["Ahmed my heart"],
-                credit_hours: 3,
-            }).then(res => {
-                expect(res.body.message).toBe("Course 'Course one' was created successfully");
-                expect(res.status).toBe(200);
-                done();
-            }).catch(e => {
-                console.log(e);
-            })
+                .set("token", token)
+                .send({
+                    name: "Course one",
+                    code: "CSE156",
+                    profs: ["Ashraf Salem", "Wathiq El-Qorashy"],
+                    TAs: ["Ahmed my heart"],
+                    credit_hours: 3,
+                }).then(res => {
+                    expect(res.body.message).toBe("Course 'Course one' was created successfully");
+                    expect(res.status).toBe(200);
+                    done();
+                }).catch(e => {
+                    console.log(e);
+                })
         });
-    })
+    });
+
+    describe("/update-course", () => {
+        beforeAll(async done => {
+            token = jwt.sign({
+                user_id: "someid",
+                username: "adminuser",
+                email: "admin.example.com",
+                role: "admin"
+            }, process.env.APP_KEY)
+
+            let course = new Course({
+                name: "Course1",
+                code: "CSE101",
+                credit_hours: 3,
+            });
+            await course.save();
+            course_id = course._id;
+            done();
+        });
+
+        beforeEach(async (done) => {
+            server = await require("../../app.js");
+            done();
+        });
+
+        afterEach(async (done) => {
+            await server.close();
+            await Course.deleteMany({});
+            await User.deleteMany({});
+            done();
+        });
+
+        it("should add the content of the course to the database", async () => {
+            const content = [
+                {
+                    title: "week1",
+                    type: "vid",
+                    data: [
+                        {
+                            title: "lecture1",
+                            url: "ommxadlfkjadf"
+                        }
+                    ]
+                }
+            ];
+            let res = await request(server).post("/update-course")
+                .set("token", token)
+                .send({
+                    code: "CSE101",
+                    content: content
+                })
+                expect(res.status).toBe(200);
+                expect(res.body.message).toBe("Course 'CSE101' was updated successfully")
+                let course = await Course.findOne({ code: "CSE101" }).lean();
+                expect(course.content).toStrictEqual(content);
+        })
+    });
 });
