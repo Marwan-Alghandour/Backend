@@ -3,67 +3,67 @@ const { User, validateUser, validateUserData } = require("./user.model.js");
 const jwt = require("jsonwebtoken");
 const { Course } = require("../courses/course.model.js");
 
-const login = async function(req, res) {
+const login = async function (req, res) {
     /**
      * req.body: {
      *     "username": String,
      *     "password": String
      * }
      */
-    
+
     const result = validateUser(req.body);
     if (result) return res.status(400).send(result);
-    
-    try{
-        const user = await User.findOne({username: req.body.username});
-        if(!user) return res.status(400).send("Wrong username or password");
+
+    try {
+        const user = await User.findOne({ username: req.body.username });
+        if (!user) return res.status(400).send("Wrong username or password");
 
         const authenticated = await bcrypt.compare(req.body.password, user.password);
-        if(!authenticated) return res.status(400).send("Wrong username or password");
+        if (!authenticated) return res.status(400).send("Wrong username or password");
 
         const token = await user.generateAuthToken();
-        res.json({token: token, role: user.role, username: user.username, email: user.email});
-    }catch(e){
+        res.json({ token: token, role: user.role, username: user.username, email: user.email });
+    } catch (e) {
         return res.status(500).send(e.message);
     }
 }
 
 
-const getCourses = async function(req, res){
+const getCourses = async function (req, res) {
     const token = req.headers.token;
-    if(!token) return res.status(401).send({message: "Forbidden"});
+    if (!token) return res.status(401).send({ message: "Forbidden" });
 
-    try{
-        const payload  = jwt.verify(token, process.env.APP_KEY);
+    try {
+        const payload = jwt.verify(token, process.env.APP_KEY);
         const id = payload.user_id;
         const user = await User.findById(id);
-        const courses = await Course.find({_id: {$in: [user.courses]}});
-        res.send({courses: courses});
-    }catch(e){
-        return res.status(500).send({message: e.message});
+        const courses = await Course.find({ _id: { $in: [user.courses] } });
+        res.send({ courses: courses });
+    } catch (e) {
+        return res.status(500).send({ message: e.message });
     }
 }
 
 
 const createAccount = async function (req, res) {
     const token = req.headers.token;
-    if(!token) return res.status(401).send({message: "Forbidden"});
+    if (!token) return res.status(401).send({ message: "Forbidden" });
 
     const payload = jwt.verify(token, process.env.APP_KEY);
-    if(payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
+    if (payload.role !== "admin") return res.status(401).send({ message: "Forbidden" });
 
     const err = validateUserData(req.body);
-    if(err) return res.status(400).send({message: err});
+    if (err) return res.status(400).send({ message: err });
 
-    try{
+    try {
         let user = await User.findOne({
             username: req.body.username.toLowerCase()
         });
         if (user)
-        return res
-            .status(400)
-            .send(`Username: ${req.body.username} already exists`);
-        
+            return res
+                .status(400)
+                .send(`Username: ${req.body.username} already exists`);
+
         user = new User({
             username: req.body.username,
             role: req.body.role,
@@ -76,11 +76,11 @@ const createAccount = async function (req, res) {
 
         await user.save();
 
-        res.send({message: `user '${user.username}' was created successfully`});
+        res.send({ message: `user '${user.username}' was created successfully` });
 
-    }catch(e){
-        return res.status(500).send({message: `Server Error: ${e.message}`});
+    } catch (e) {
+        return res.status(500).send({ message: `Server Error: ${e.message}` });
     }
 }
 
-module.exports = {login, createAccount, getCourses};
+module.exports = { login, createAccount, getCourses };

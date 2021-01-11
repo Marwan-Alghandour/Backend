@@ -6,14 +6,14 @@ require("dotenv").config();
 
 
 const userSchema = new mongoose.Schema({
-    username: {type: String, minlength: 3, maxlength: 255, required: true},
-    password: {type: String, minlength: 5, maxlength: 1023, required: true},
-    role: {type: String, default: "student"},
-    email: {type: String, minlength: 5, maxlength: 1023, required: true},
-    Courses: [{type: mongoose.Types.ObjectId, ref: "Course"}]
+    username: { type: String, minlength: 3, maxlength: 255, required: true },
+    password: { type: String, minlength: 5, maxlength: 1023, required: true },
+    role: { type: String, default: "student" },
+    email: { type: String, minlength: 5, maxlength: 1023, required: true },
+    Courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }]
 });
 
-userSchema.methods.generateAuthToken = function(){
+userSchema.methods.generateAuthToken = function () {
     /**
      * payload:
      *  'user_id': user.pk,
@@ -50,11 +50,11 @@ function validateUser(data) {
     });
     // const result = joi.validate(data, Schema)
     const result = Schema.validate(data);
-    if(result.error) return result.error.details[0].message;
+    if (result.error) return result.error.details[0].message;
     else return false;
 };
 
-function validateUserData(data){
+function validateUserData(data) {
     const Schema = joi.object({
         username: joi.string().min(5).max(255).required(),
         password: joi.string().min(8).max(1023).required(),
@@ -63,10 +63,10 @@ function validateUserData(data){
     });
     // const result = joi.validate(data, Schema)
     const result = Schema.validate(data);
-    if(result.error) return result.error.details[0].message;
+    if (result.error) return result.error.details[0].message;
     else return false;
 }
 
-exports.User = User; 
+exports.User = User;
 exports.validateUser = validateUser;
 exports.validateUserData = validateUserData;

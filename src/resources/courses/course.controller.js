@@ -60,7 +60,7 @@ async function get_users_in_course(req, res) {
     const course_id = req.params.courseID;
     try {
         let course = await Course.findById(course_id);
-        if (!course) return res.status(404).send({message: "Course not found"});
+        if (!course) return res.status(404).send({ message: "Course not found" });
         console.log(course);
         res.send({
             course: course,
@@ -68,7 +68,7 @@ async function get_users_in_course(req, res) {
             students: course.students
         });
     } catch (e) {
-        return res.status(500).send({message: e.message});
+        return res.status(500).send({ message: e.message });
     }
 }
 

@@ -3,13 +3,13 @@ const joi = require("@hapi/joi");
 
 
 const CourseSchema = new mongoose.Schema({
-    name: {type: String, minlength: 5, maxlength: 1023, required: true},
-    code: {type: String, minlength: 1, maxlength: 255, required: true, unique: true},
-    profs: {type: [String]},
-    TAs: {type: [String]},
-    credit_hours: {type: Number, min: 0, max: 10},
-    content: {type: [Object], default: []},
-    students: [{type: mongoose.Types.ObjectId, ref: "User"}]
+    name: { type: String, minlength: 5, maxlength: 1023, required: true },
+    code: { type: String, minlength: 1, maxlength: 255, required: true, unique: true },
+    profs: { type: [String] },
+    TAs: { type: [String] },
+    credit_hours: { type: Number, min: 0, max: 10 },
+    content: { type: [Object], default: [] },
+    students: [{ type: mongoose.Types.ObjectId, ref: "User" }]
 });
 
 const Course = mongoose.model("Course", CourseSchema, 'courses');
@@ -30,7 +30,7 @@ function validateCourse(data) {
     });
     // const result = joi.validate(data, Schema)
     const result = Schema.validate(data);
-    if(result.error) return result.error.details[0].message;
+    if (result.error) return result.error.details[0].message;
     else return false;
 };
 
