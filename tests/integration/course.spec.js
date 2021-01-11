@@ -10,8 +10,13 @@ var course_id;
 
 describe("test user authentication", () => {
 
+    beforeAll(async done => {
+        server = await require("../../app.js");
+        done();
+    })
+
+
     afterAll(done => {
-        // mongoose.connection.close()
         server.close();
         done();
     });
@@ -27,13 +32,7 @@ describe("test user authentication", () => {
             done();
         });
 
-        beforeEach(async (done) => {
-            server = await require("../../app.js");
-            done();
-        });
-
         afterEach(async (done) => {
-            await server.close();
             await Course.deleteMany({});
             await User.deleteMany({});
             done();
@@ -78,13 +77,8 @@ describe("test user authentication", () => {
             done();
         });
 
-        beforeEach(async (done) => {
-            server = await require("../../app.js");
-            done();
-        });
 
         afterEach(async (done) => {
-            await server.close();
             await Course.deleteMany({});
             await User.deleteMany({});
             done();

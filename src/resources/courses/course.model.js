@@ -9,6 +9,7 @@ const CourseSchema = new mongoose.Schema({
     TAs: {type: [String]},
     credit_hours: {type: Number, min: 0, max: 10},
     content: {type: [Object], default: []},
+    students: [{type: mongoose.Types.ObjectId, ref: "User"}]
 });
 
 const Course = mongoose.model("Course", CourseSchema);

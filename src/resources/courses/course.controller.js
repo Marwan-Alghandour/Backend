@@ -5,7 +5,7 @@ async function create_course(req, res) {
     const token = req.headers.token;
     if(!token) return res.status(401).send({message: "Forbidden"});
 
-    const payload = jwt.decode(token);
+    const payload = jwt.verify(token, process.env.APP_KEY);
     if(payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
 
     const error = validateCourse(req.body);
@@ -35,7 +35,7 @@ async function take_content(req, res){
     const token = req.headers.token;
     if(!token) return res.status(401).send({message: "Forbidden"});
 
-    const payload = jwt.decode(token);
+    const payload = jwt.verify(token, process.env.APP_KEY);
     if(payload.role !== "teacher" && payload.role !== "admin") return res.status(401).send({message: "Forbidden"});
         
     try {
@@ -50,5 +50,23 @@ async function take_content(req, res){
     }
 }
 
+async function get_users_in_course(req, res){
+    const token = req.headers.token;
+    if(!token) return res.status(401).send("Forbidden");
+
+    const payload = jwt.verify(token, process.env.APP_KEY);
+    const course_id = req.params.cours_id;
+    try{
+        const course = await Course.findById(course_id).populate("User").exec();
+        if(!course) return res.status(404).send("Course not found");
+        console.log(course);
+        res.send({students: course.students.filter(st => st.role === "student")});
+    }catch(e){
+        return res.status(500).send(e.message);
+    }
+}
+
+
 module.exports.create_course = create_course;
 module.exports.take_content = take_content;
+module.exports.get_users_in_course = get_users_in_course;

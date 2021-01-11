@@ -3,22 +3,24 @@ const request = require("supertest");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const { assert } = require("@hapi/joi");
 var server;
 var token;
 require("dotenv").config();
 
 describe("test user authentication", () => {
 
+    beforeAll(async done => {
+        server = await require("../../app.js");
+        done();
+    })
+
     afterAll(done => {
-        // mongoose.connection.close();
         server.close();
         done();
     });
 
     describe("/login", () => {
         beforeEach(async (done) => {
-            server = await require("../../app.js");
             const hash = await bcrypt.hash("mypassword", 10);
             const user = new User({ username: "username", password: hash, email: "user@example.com" });
             await user.save();
@@ -26,7 +28,6 @@ describe("test user authentication", () => {
         });
 
         afterEach(async (done) => {
-            server.close();
             await User.deleteMany({});
             done();
         });
@@ -45,7 +46,7 @@ describe("test user authentication", () => {
             expect(payload.username).toBe("username");
             expect(payload.email).toBe("user@example.com");
             expect(payload.role).toBe("student");
-            done()
+            done();
         });
 
         it("should return status code 400 with Wrong username or password error", async (done) => {
@@ -54,7 +55,7 @@ describe("test user authentication", () => {
                 .send({ username: "not my username", password: "mypassword" });
             expect(res.status).toBe(400);
             expect(res.text).toBe("Wrong username or password");
-            done()
+            done();
         });
 
         it("should return status code 400 with Wrong username or password error", async (done) => {
@@ -89,13 +90,8 @@ describe("test user authentication", () => {
             done();
         });
 
-        beforeEach(async (done) => {
-            server = await require("../../app.js");
-            done();
-        });
 
         afterEach(async (done) => {
-            await server.close();
             await User.deleteMany({});
             done();
         });
