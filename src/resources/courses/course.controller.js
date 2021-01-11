@@ -1,6 +1,15 @@
 const jwt = require("jsonwebtoken");
 const { Course, validateCourse } = require("./course.model");
 
+async function get_courses(req, res){
+    try{
+        let courses = await Course.find({});
+        res.send({courses: courses});
+    }catch(e){
+        return res.status(500).send({message: e.message});
+    }
+}
+
 async function create_course(req, res) {
     const token = req.headers.token;
     if(!token) return res.status(401).send({message: "Forbidden"});
@@ -50,6 +59,6 @@ async function take_content(req, res){
     }
 }
 
+module.exports.get_courses = get_courses;
 module.exports.create_course = create_course;
-
 module.exports.take_content = take_content;
