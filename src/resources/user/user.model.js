@@ -10,7 +10,8 @@ const userSchema = new mongoose.Schema({
     password: { type: String, minlength: 5, maxlength: 1023, required: true },
     role: { type: String, default: "student" },
     email: { type: String, minlength: 5, maxlength: 1023, required: true },
-    courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }]
+    courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }],
+    taken_quizes: [{ type: mongoose.Types.ObjectId, ref: "Quiz" }]
 });
 
 userSchema.methods.generateAuthToken = function () {

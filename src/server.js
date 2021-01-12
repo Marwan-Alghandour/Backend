@@ -1,12 +1,14 @@
 const express = require("express");
 const app = express();
 const connect = require("./utils/db");
+
+// make env file can be accessed from process.env
+require("dotenv").config();
+
 const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-// make env file can be accessed from process.env
-require("dotenv").config();
 
 // routes
 require("./resources/router")(app);
