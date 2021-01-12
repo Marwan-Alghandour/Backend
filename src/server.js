@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const connect = require("./utils/db");
+const cors = require("./middlewares/cors");
 
 // make env file can be accessed from process.env
 require("dotenv").config();
@@ -8,6 +9,7 @@ require("dotenv").config();
 const port = process.env.PORT || 3000;
 
 app.use(express.urlencoded({ extended: false }));
+app.use(cors);
 app.use(express.json());
 
 // routes
