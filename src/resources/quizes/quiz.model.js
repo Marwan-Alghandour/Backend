@@ -14,7 +14,9 @@ quizSchema.methods.grade = function(answers){
     let grade = 0;
     for(answer of answers){
         correct = this.correct_answers.find(item => item.hash === answer.hash).answer;
-        if(correct === answer) grade += 1;
+        if(correct === answer.answer) {
+            grade = grade + 1;
+        }
     }
     return [grade, this.content.length];
 }
