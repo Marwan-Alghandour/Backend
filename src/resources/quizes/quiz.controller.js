@@ -1,8 +1,17 @@
 const {Course} = require("../courses/course.model");
-const {Quiz} = require("./quiz.model")
+const {Quiz} = require("./quiz.model");
+const jwt = require("jsonwebtoken");
 
 const create_quiz = async function(req, res){
+
+    const token = req.headers.token;
+    if (!token) return res.status(401).send("Forbidden");
+
+    const payload = jwt.verify(token, process.env.APP_KEY);
+    if(!payload) return res.status(401).send({message: "Forbidden"});
+
     if(!req.body.course_code) return res.status(404).send({message: "Please send the course id"});
+
     const content_answers = req.body.quiz;
     let content = [];
     let answers = [];
@@ -34,5 +43,32 @@ const create_quiz = async function(req, res){
     }
 }
 
+const submit_quiz = async function(req, res){
 
-module.exports.create_quiz = create_quiz;
+    const token = req.headers.token;
+    if (!token) return res.status(401).send("Forbidden");
+
+    const quiz_id = req.params.quiz_id;
+    if(!quiz_id) return res.status(404).send({message: "Please send quiz id"});
+
+    const payload = jwt.verify(token, process.env.APP_KEY);
+    if(!payload) return res.status(401).send({message: "Forbidden"});
+
+    var answers = [];
+    for(answer of req.body.answers){
+        answers.push({
+            hash: answer.hash,
+            answer: answer.valid_answers[answer.answer]
+        })
+    }
+
+    try{
+        const quiz = await Quiz.findById(quiz_id);
+        res.send({message: "Success", grade: quiz.grade(answers)});
+    }catch(e){
+        return res.status(500).send({message: e.message});
+    }
+
+}
+
+module.exports = { create_quiz, submit_quiz };

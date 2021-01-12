@@ -98,7 +98,28 @@ describe("Quiz", () => {
 
             expect(res.body.message).toBe("Quiz Created successfully");
             expect(res.status).toBe(200);
-        })
-    })
+        });
+    });
+
+    describe("submit-quiz/quiz-id", () => {
+        it("should submit the quiz data and return the grad", async () => {
+            const res = await request(server).post(`/submit-quiz/${quiz_id}`)
+            .set("token", student_token)
+            .send({
+                answers: [
+                    {hash: "adlfkjad", question: "1", valid_answers: ["1", "2", "3", "4"], answer: 0},
+                    {hash: "adlfkj", question: "2", valid_answers: ["1", "2", "3", "4"], answer: 1},
+                    {hash: "adlfad", question: "3", valid_answers: ["1", "2", "3", "4"], answer: 2},
+                    {hash: "adffkjad", question: "4", valid_answers: ["1", "2", "3", "4"], answer: 0},
+                    {hash: "adlfkad", question: "5", valid_answers: ["1", "2", "3", "4"], answer: 2}
+                ]
+            });
+
+            expect(res.body.message).toBe("Success");
+            expect(res.status).toBe(200);
+            expect(res.body.grade[0]).toBe(3);
+            expect(res.body.grade[1]).toBe(5);
+        });
+    });
 });
 
