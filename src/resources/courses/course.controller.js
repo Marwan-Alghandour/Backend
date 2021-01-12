@@ -43,7 +43,7 @@ async function take_content(req, res) {
         if (!request) return res.status(400).send({ message: "Course with this code doesn't exist" });
 
         //const content = {content: req.body.content}; 
-        insert = await Course.findOneAndUpdate({ code: req.body.code }, { content: req.body.content });
+        insert = await Course.findOneAndUpdate({ code: req.body.code }, { content: req.body.content }, { useFindAndModify: false });
         return res.send({ message: `Course '${req.body.code}' was updated successfully` });
     } catch (e) {
         return res.status(500).send({ message: e.message });
@@ -59,13 +59,12 @@ async function get_users_in_course(req, res) {
 
     const course_id = req.params.courseID;
     try {
-        let course = await Course.findById(course_id);
+        let course = await Course.findById(course_id).populate("users").exec();
         if (!course) return res.status(404).send({ message: "Course not found" });
-        console.log(course);
         res.send({
             course: course,
             message: "Success",
-            students: course.students
+            students: course.users
         });
     } catch (e) {
         return res.status(500).send({ message: e.message });

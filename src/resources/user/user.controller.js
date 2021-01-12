@@ -36,9 +36,8 @@ const getCourses = async function (req, res) {
     try {
         const payload = jwt.verify(token, process.env.APP_KEY);
         const id = payload.user_id;
-        const user = await User.findById(id);
-        const courses = await Course.find({ _id: { $in: [user.courses] } });
-        res.send({ courses: courses });
+        const user = await User.findById(id).populate("courses").exec();
+        res.send({ message: "Success", courses: user.courses });
     } catch (e) {
         return res.status(500).send({ message: e.message });
     }

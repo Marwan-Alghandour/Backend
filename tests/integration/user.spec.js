@@ -134,7 +134,7 @@ describe("test user authentication", () => {
                 code: "CSE101",
                 name: "Structural Programing",
                 credit_hours: 4,
-                students: [user._id]
+                users: [user._id]
             })
             course = await course.save();
             done();
@@ -148,11 +148,10 @@ describe("test user authentication", () => {
         });
 
         it("should get all users that are registered in this course", async () => {
-            console.log(`/users/${course_id}`);
             let res = await request(server).get(`/users/${course_id}`).set({ token });
             expect(res.body.message).toBe("Success");
             expect(res.status).toBe(200);
-            expect(res.body.students).toStrictEqual([user_data._id.toHexString()]);
+            expect(res.body.students[0]._id).toBe(user_data._id.toHexString());
         });
     });
 });
