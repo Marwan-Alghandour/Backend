@@ -8,7 +8,8 @@ const create_quiz = async function(req, res){
     if (!token) return res.status(401).send("Forbidden");
 
     const payload = jwt.verify(token, process.env.APP_KEY);
-    if(!payload) return res.status(401).send({message: "Forbidden"});
+    if(!payload || (payload.role !== "teacher" && payload.role !== "admin"))
+        return res.status(401).send({message: "Forbidden"});
 
     if(!req.body.course_code) return res.status(404).send({message: "Please send the course id"});
 

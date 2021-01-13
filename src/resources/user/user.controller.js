@@ -42,7 +42,7 @@ const getCourses = async function (req, res) {
         .populate("quizes")
         .populate("announcements")
         .exec();
-        
+
         res.send({ message: "Success", courses: user.courses });
     } catch (e) {
         return res.status(500).send({ message: e.message });
@@ -59,7 +59,6 @@ const getUsers = async function (req, res) {
 
     try {
         const users = await User.find({});
-        console.log(users);
         res.send({
             message: "Success",
             teachers: users.filter(user => user.role === "teacher"),
