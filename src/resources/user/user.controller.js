@@ -37,7 +37,12 @@ const getCourses = async function (req, res) {
     if(!payload) return res.status(401).send({message: "Forbidden"});
 
     try {
-        const user = await User.findById(payload.user_id).populate("courses").exec();
+        const user = await User.findById(payload.user_id)
+        .populate("courses")
+        .populate("quizes")
+        .populate("announcements")
+        .exec();
+        
         res.send({ message: "Success", courses: user.courses });
     } catch (e) {
         return res.status(500).send({ message: e.message });
