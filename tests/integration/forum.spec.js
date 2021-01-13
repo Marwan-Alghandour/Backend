@@ -10,8 +10,9 @@ var server;
 var student_token;
 var course_id;
 var user_id;
+var course_code;
 
-describe("Assignment", () => {
+describe("Forum", () => {
 
     beforeAll(async done => {
         server = await require("../../app.js");
@@ -36,6 +37,7 @@ describe("Assignment", () => {
 
         await course.save();
         course_id = course._id;
+        course_code = course.code;
 
         const question = new Question({
             course: course_id,
@@ -66,8 +68,8 @@ describe("Assignment", () => {
         done();
     });
 
-    describe("create-assignment", () => {
-        it("should return 200 and save assignment to db", async () => {
+    describe("get Forum", () => {
+        it("should return 200 and get all questions and comments for specific course", async () => {
             console.log(course_id);
             const res = await request(server).get(`/forum/${course_id}`)
                 .set("token", student_token)
@@ -79,6 +81,25 @@ describe("Assignment", () => {
             expect(res.body.questions[0].body).toBe("mo7annak question");
             expect(res.body.questions[0].comments).toHaveLength(1);
             expect(res.body.questions[0].comments[0].body).toBe("mo7annak comment");
+        });
+    });
+
+    describe("ask a question", () => {
+        it("should return 200 and save question to database", async () => {
+            console.log(course_id);
+            const res = await request(server).post(`/forum-ask`)
+                .set("token", student_token)
+                .send({
+                    course_code: course_code,
+                    question: "so2al mo7annak"
+                });
+
+            expect(res.body.message).toBe("Success");
+            expect(res.status).toBe(200);
+
+            const c = await Course.findById(course_id).populate("questions").exec();
+            expect(c.questions).toHaveLength(2);
+            expect(c.questions[1].body).toBe("so2al mo7annak")
         });
     });
 
