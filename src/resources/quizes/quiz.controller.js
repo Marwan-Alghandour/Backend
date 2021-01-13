@@ -41,6 +41,8 @@ const create_quiz = async function(req, res){
         });
 
         await quiz.save();
+
+        await Course.findOneAndUpdate({code: req.body.course_code}, {$push: {quizes: quiz._id}})
         res.send({message: "Quiz Created successfully"});
     }catch(e){
         return res.status(500).send({message: e.message});

@@ -10,4 +10,3 @@ const courseRouter = app => {
 };
 
 module.exports = courseRouter;
-

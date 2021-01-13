@@ -3,6 +3,7 @@ const userRouter = require('./user/user.router');
 const courseRouter = require('./courses/course.router');
 const quizRouter = require("./quizes/quiz.router");
 const annRouter = require("./announcement/announcement.router");
+const assRouter = require("./assignments/assignment.router");
 
 const routers = app => {
     mainRouter(app);
@@ -10,6 +11,7 @@ const routers = app => {
     courseRouter(app);
     quizRouter(app);
     annRouter(app);
+    assRouter(app);
 };
 
 module.exports = routers;
