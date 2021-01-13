@@ -13,7 +13,8 @@ const CourseSchema = new mongoose.Schema({
     users: [{ type: mongoose.Types.ObjectId, ref: "User" }],
     quizes: [{ type: mongoose.Types.ObjectId, ref: "Quiz" }],
     assignments: [{ type: mongoose.Types.ObjectId, ref: "Assignments" }],
-    announcements: [{ type: mongoose.Types.ObjectId, ref: "Announcement" }]
+    announcements: [{ type: mongoose.Types.ObjectId, ref: "Announcement" }],
+    questions: [{ type: mongoose.Types.ObjectId, ref: "Question" }]
 });
 
 const Course = mongoose.model("Course", CourseSchema);
