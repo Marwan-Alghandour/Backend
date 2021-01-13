@@ -8,10 +8,11 @@ const CourseSchema = new mongoose.Schema({
     profs: { type: [String] },
     TAs: { type: [String] },
     credit_hours: { type: Number, min: 0, max: 10 },
+    imgURL: { type: String, default: "https://i.imgflip.com/2xlcka.png" },
     content: { type: [Object], default: [] },
     users: [{ type: mongoose.Types.ObjectId, ref: "User" }],
-    quizes: [{type: mongoose.Types.ObjectId, ref: "Quiz"}],
-    announcements: [{type: mongoose.Types.ObjectId, ref: "Announcement"}]
+    quizes: [{ type: mongoose.Types.ObjectId, ref: "Quiz" }],
+    announcements: [{ type: mongoose.Types.ObjectId, ref: "Announcement" }]
 });
 
 const Course = mongoose.model("Course", CourseSchema);

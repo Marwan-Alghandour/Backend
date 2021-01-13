@@ -20,7 +20,8 @@ async function create_course(req, res) {
             code: req.body.code,
             profs: req.body.profs,
             TAs: req.body.TAs,
-            credit_hours: req.body.credit_hours
+            credit_hours: req.body.credit_hours,
+            imgURL: req.body.imgURL
         });
 
         await course.save();
