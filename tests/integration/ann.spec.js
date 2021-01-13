@@ -79,6 +79,7 @@ describe("Quiz", () => {
             expect(res.status).toBe(200);
             expect(res.body.courses).toHaveLength(1);
             expect(res.body.courses[0].announcements).toHaveLength(1);
+            expect(res.body.courses[0].announcements[0].title).toBe("something is going to happen")
         });
     });
 

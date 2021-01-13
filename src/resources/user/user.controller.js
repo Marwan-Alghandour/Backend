@@ -37,10 +37,10 @@ const getCourses = async function (req, res) {
     if(!payload) return res.status(401).send({message: "Forbidden"});
 
     try {
-        const user = await User.findById(payload.user_id)
-        .populate("courses")
-        .populate("quizes")
-        .populate("announcements")
+        const user = await User.findById(payload.user_id).populate({
+            path: "courses",
+            populate: [{path: "quizes"}, {path: "announcements"}]
+        })
         .exec();
 
         res.send({ message: "Success", courses: user.courses });
