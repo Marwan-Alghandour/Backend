@@ -5,7 +5,7 @@ const joi = require("@hapi/joi");
 const CourseSchema = new mongoose.Schema({
     name: { type: String, minlength: 5, maxlength: 1023, required: true },
     code: { type: String, minlength: 1, maxlength: 255, required: true, unique: true },
-    profs: { type: [String] },
+    teachers: [{type: mongoose.Types.ObjectId, ref: "User"}],
     TAs: { type: [String] },
     credit_hours: { type: Number, min: 0, max: 10 },
     imgURL: { type: String, default: "https://i.imgflip.com/2xlcka.png" },
@@ -27,7 +27,6 @@ function validateCourse(data) {
     const Schema = joi.object({
         name: joi.string().min(5).max(255).required(),
         code: joi.string().min(1).max(255).required(),
-        profs: joi.array(),
         TAs: joi.array(),
         credit_hours: joi.number().min(0).max(10)
     });

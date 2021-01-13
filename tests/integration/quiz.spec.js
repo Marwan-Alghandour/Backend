@@ -35,7 +35,7 @@ describe("Quiz", () => {
         });
         student_token = user.generateAuthToken();
         await user.save();
-        
+
         user_id = user._id;
 
         let course = new Course({
@@ -53,26 +53,27 @@ describe("Quiz", () => {
         const quiz = new Quiz({
             course: course_id,
             content: [
-                {hash: "adlfkjad", question: "1", valid_answers: ["1", "2", "3", "4"]},
-                {hash: "adlfkj", question: "2", valid_answers: ["1", "2", "3", "4"]},
-                {hash: "adlfad", question: "3", valid_answers: ["1", "2", "3", "4"]},
-                {hash: "adffkjad", question: "4", valid_answers: ["1", "2", "3", "4"]},
-                {hash: "adlfkad", question: "5", valid_answers: ["1", "2", "3", "4"]}
+                { hash: "adlfkjad", question: "1", valid_answers: ["1", "2", "3", "4"] },
+                { hash: "adlfkj", question: "2", valid_answers: ["1", "2", "3", "4"] },
+                { hash: "adlfad", question: "3", valid_answers: ["1", "2", "3", "4"] },
+                { hash: "adffkjad", question: "4", valid_answers: ["1", "2", "3", "4"] },
+                { hash: "adlfkad", question: "5", valid_answers: ["1", "2", "3", "4"] }
             ],
             correct_answers: [
-                {hash: "adlfkjad", answer: "1"},
-                {hash: "adlfkj", answer: "2"},
-                {hash: "adlfad", answer: "3"},
-                {hash: "adffkjad", answer: "4"},
-                {hash: "adlfkad", answer: "5"}
-            ]
+                { hash: "adlfkjad", answer: "1" },
+                { hash: "adlfkj", answer: "2" },
+                { hash: "adlfad", answer: "3" },
+                { hash: "adffkjad", answer: "4" },
+                { hash: "adlfkad", answer: "5" }
+            ],
+            title: "Quiz 1",
+            start_date: new Date()
         });
 
         await quiz.save();
         quiz_id = quiz._id;
         done();
     });
-
 
     afterAll(async done => {
         await Course.deleteMany({});
@@ -84,17 +85,19 @@ describe("Quiz", () => {
     describe("create-quiz", () => {
         it("should return 200 and save quiz to db", async () => {
             const res = await request(server).post("/create-quiz")
-            .set("token", teacher_token)
-            .send({
-                course_code: "CSE101",
-                quiz: [
-                    {hash: "adlfkjad", question: "1", valid_answers: ["1", "2", "3", "4"], answer: 0},
-                    {hash: "adlfkj", question: "2", valid_answers: ["1", "2", "3", "4"], answer: 1},
-                    {hash: "adlfad", question: "3", valid_answers: ["1", "2", "3", "4"], answer: 2},
-                    {hash: "adffkjad", question: "4", valid_answers: ["1", "2", "3", "4"], answer: 3},
-                    {hash: "adlfkad", question: "5", valid_answers: ["1", "2", "3", "4"], answer: 4}
-                ]
-            });
+                .set("token", teacher_token)
+                .send({
+                    course_code: "CSE101",
+                    quiz: [
+                        { hash: "adlfkjad", question: "1", valid_answers: ["1", "2", "3", "4"], answer: 0 },
+                        { hash: "adlfkj", question: "2", valid_answers: ["1", "2", "3", "4"], answer: 1 },
+                        { hash: "adlfad", question: "3", valid_answers: ["1", "2", "3", "4"], answer: 2 },
+                        { hash: "adffkjad", question: "4", valid_answers: ["1", "2", "3", "4"], answer: 3 },
+                        { hash: "adlfkad", question: "5", valid_answers: ["1", "2", "3", "4"], answer: 4 }
+                    ],
+                    start_date: new Date(),
+                    title: "Quiz 1"
+                });
 
             expect(res.body.message).toBe("Quiz Created successfully");
             expect(res.status).toBe(200);
@@ -103,22 +106,29 @@ describe("Quiz", () => {
 
     describe("submit-quiz/quiz-id", () => {
         it("should submit the quiz data and return the grad", async () => {
-            const res = await request(server).post(`/submit-quiz/${quiz_id}`)
-            .set("token", student_token)
-            .send({
-                answers: [
-                    {hash: "adlfkjad", question: "1", valid_answers: ["1", "2", "3", "4"], answer: 0},
-                    {hash: "adlfkj", question: "2", valid_answers: ["1", "2", "3", "4"], answer: 1},
-                    {hash: "adlfad", question: "3", valid_answers: ["1", "2", "3", "4"], answer: 2},
-                    {hash: "adffkjad", question: "4", valid_answers: ["1", "2", "3", "4"], answer: 0},
-                    {hash: "adlfkad", question: "5", valid_answers: ["1", "2", "3", "4"], answer: 2}
-                ]
-            });
+            let res = await request(server).post(`/submit-quiz/${quiz_id}`)
+                .set("token", student_token)
+                .send({
+                    answers: [
+                        { hash: "adlfkjad", question: "1", valid_answers: ["1", "2", "3", "4"], answer: 0 },
+                        { hash: "adlfkj", question: "2", valid_answers: ["1", "2", "3", "4"], answer: 1 },
+                        { hash: "adlfad", question: "3", valid_answers: ["1", "2", "3", "4"], answer: 2 },
+                        { hash: "adffkjad", question: "4", valid_answers: ["1", "2", "3", "4"], answer: 0 },
+                        { hash: "adlfkad", question: "5", valid_answers: ["1", "2", "3", "4"], answer: 2 }
+                    ]
+                });
 
             expect(res.body.message).toBe("Success");
             expect(res.status).toBe(200);
             expect(res.body.grade[0]).toBe(3);
             expect(res.body.grade[1]).toBe(5);
+
+            const q = await Quiz.findById(quiz_id).populate("users_taken._id").exec();
+            expect(q.users_taken).toHaveLength(1);
+            expect(q.users_taken[0].grade).toHaveLength(2);
+            expect(q.users_taken[0].grade[0]).toBe(3)
+            expect(q.users_taken[0].grade[1]).toBe(5)
+
         });
     });
 });

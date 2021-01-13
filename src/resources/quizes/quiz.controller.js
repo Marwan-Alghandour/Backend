@@ -1,6 +1,7 @@
 const {Course} = require("../courses/course.model");
 const {Quiz} = require("./quiz.model");
 const jwt = require("jsonwebtoken");
+const { User } = require("../user/user.model");
 
 const create_quiz = async function(req, res){
 
@@ -35,6 +36,8 @@ const create_quiz = async function(req, res){
             course: course._id,
             content: content,
             correct_answers: answers,
+            start_date: req.body.start_date,
+            title: req.body.title
         });
 
         await quiz.save();
@@ -65,7 +68,17 @@ const submit_quiz = async function(req, res){
 
     try{
         const quiz = await Quiz.findById(quiz_id);
-        res.send({message: "Success", grade: quiz.grade(answers)});
+        const grade = quiz.grade(answers);
+        await User.findByIdAndUpdate(payload.user_id, {
+            $push: {taken_quizes: {_id: quiz._id, grade: grade}}
+        }, {new: true, useFindAndModify: false});
+
+        await Quiz.findByIdAndUpdate(quiz._id, {
+            $push: {users_taken: {_id: payload.user_id, grade: grade}}
+        }, {new: true, useFindAndModify: false});
+
+
+        res.send({message: "Success", grade: grade});
     }catch(e){
         return res.status(500).send({message: e.message});
     }

@@ -19,7 +19,9 @@ describe("test quiz grading", () => {
                 {hash: "adlfad", answer: "3"},
                 {hash: "adffkjad", answer: "4"},
                 {hash: "adlfkad", answer: "5"}
-            ]
+            ],
+            title: "Quiz 1",
+            start_date: new Date()
         });
 
         const grades = quiz.grade([
