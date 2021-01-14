@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
     email: { type: String, minlength: 5, maxlength: 1023, required: true },
     courses: [{ type: mongoose.Types.ObjectId, ref: "Course" }],
     taken_quizes: [{ type: mongoose.Schema.Types.Mixed, ref: "Quiz", grade: { type: [Number], default: [0, 1] } }],
-    taken_assignments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Assignment" }]
+    taken_assignments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Assignment" }],
+    grades: {type: [Object], default: []}
 });
 
 userSchema.methods.generateAuthToken = function () {

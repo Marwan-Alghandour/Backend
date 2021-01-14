@@ -65,4 +65,35 @@ const submit_assignment = async function(req, res){
 
 }
 
-module.exports = { create_assignment, submit_assignment };
+const grade_assignment = async function(req, res){
+
+    const token = req.headers.token;
+    if (!token) return res.status(401).send("Forbidden");
+
+    const assignment_id = req.params.assignment_id;
+    if(!assignment_id) return res.status(404).send({message: "Please send assignment id"});
+
+    const grade = req.params.grade;
+    if(!grade) return res.status(404).send({message: "Please send the grade"});
+
+    const payload = jwt.verify(token, process.env.APP_KEY);
+    if(!payload || payload.role !== "teacher") return res.status(401).send({message: "Forbidden"});
+
+    try{
+
+        let user = await User.find({ taken_assignments: assignment_id });
+
+        if (!user) return res.status(404).send({ message: "This assignment_id is not found" });
+
+        let course = await Assignment.find({ users_taken: user.user_id });
+
+        await User.findOneAndUpdate({ username: user.username }, { grade: {course: course.course, grade: grade} }, { useFindAndModify: false } )
+
+        res.send({message: "Success"});
+    }catch(e){
+        return res.status(500).send({message: e.message});
+    }
+
+}
+
+module.exports = { create_assignment, submit_assignment, grade_assignment };

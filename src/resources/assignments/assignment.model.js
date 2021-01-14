@@ -7,7 +7,7 @@ const assignmentSchema = new mongoose.Schema({
     description: { type: String },
     url: { type: String },
     deadline: { type: Date, required: true },
-    users_taken: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
+    users_taken: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 const Assignment = mongoose.model("Assignment", assignmentSchema);
